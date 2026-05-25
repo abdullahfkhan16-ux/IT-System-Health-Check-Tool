@@ -57,4 +57,80 @@ $Warnings = @()
 if ($DiskFreePercent -lt 15) {
     $Warnings += "Low disk space warning: C: drive free space is below 15%."
 }
+if ($UptimeDays -gt 7) {
+    $Warnings += "High uptime warning: Computer has been running for more than 7 days."
+}
 
+$StoppedServices = $ImportantServices | Where-Object Status -ne "Running"
+
+if ($StoppedServices) {
+    $Warnings += "Service warning: One or more important services are not running."
+}
+
+$DisabledAdapters = $NetworkAdapters | Where-Object Status -eq "Disabled"
+
+if ($DisabledAdapters) {
+    $Warnings += "Network warning: One or more network adapters are disabled."
+}
+if ($Warnings.Count -eq 0) {
+    $Warnings += "No major warnings found."
+}
+
+$SystemReport = [PSCustomObject]@{
+    ComputerName         = $ComputerName
+    LoggedInUser         = $LoggedInUser
+    ReportDate           = $CurrentDate
+    WindowsVersion       = $WindowsVersion
+    WindowsBuild         = $WindowsBuild
+    LastBootTime         = $LastBootTime
+    UptimeDays           = $UptimeDays
+    CpuName              = $CpuName
+    CpuCores             = $CpuCores
+    CpuLogicalProcessors = $CpuLogicalProcessors
+    TotalRamGB           = $TotalRamGB
+    UsedRamGB            = $UsedRamGB
+    FreeRamGB            = $FreeRamGB
+    DiskSizeGB           = $DiskSizeGB
+    DiskUsedGB           = $DiskUsedGB
+    DiskFreeGB           = $DiskFreeGB
+    DiskFreePercent      = $DiskFreePercent
+    IpAddress            = $IpAddress
+}
+
+$TxtContent = @"
+IT System Health Check Report
+
+Computer Name: $ComputerName
+Logged-in User: $LoggedInUser
+Report Date: $CurrentDate
+
+Windows Version: $WindowsVersion
+Windows Build: $WindowsBuild
+Last Boot Time: $LastBootTime
+Uptime Days: $UptimeDays
+
+CPU Name: $CpuName
+CPU Cores: $CpuCores
+CPU Logical Processors: $CpuLogicalProcessors
+
+Total RAM: $TotalRamGB GB
+Used RAM: $UsedRamGB GB
+Free RAM: $FreeRamGB GB
+
+Disk Size: $DiskSizeGB GB
+Disk Used: $DiskUsedGB GB
+Disk Free: $DiskFreeGB GB
+Disk Free Percent: $DiskFreePercent%
+
+IP Address: $IpAddress
+
+Warnings:
+$($Warnings -join "`n")
+"@
+$TxtContent | Out-File -FilePath $TxtReport
+$SystemReport | Export-Csv -Path $CsvReport -NoTypeInformation
+$HtmlContent = $SystemReport | ConvertTo-Html -Title "IT System Health Check Report" -PreContent "<h1>IT System Health Check Report</h1>"
+$HtmlContent | Out-File -FilePath $HtmlReport
+
+Write-Host "System health check completed."
+Write-Host "Reports saved in the reports folder."
