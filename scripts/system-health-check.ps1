@@ -25,8 +25,8 @@ $WindowsVersion = $OperatingSystem.Caption
 $WindowsBuild = $OperatingSystem.BuildNumber
 
 $LastBootTime = $OperatingSystem.LastBootUpTime
-$UpTime = (Get-Date) - $LastBootTime
-$UpTimeDays = [math]:: Round.($UpTime.TotalDays, 1)
+$Uptime = (Get-Date) - $LastBootTime
+$UptimeDays = [math]::Round($Uptime.TotalDays, 1)
 
 $Processor = Get-CimInstance Win32_Processor
 $CpuName = $Processor.Name
@@ -35,9 +35,9 @@ $CpuLogicalProcessors = $Processor.NumberOfLogicalProcessors
 
 $TotalRamBytes = $OperatingSystem.TotalVisibleMemorySize * 1KB
 $FreeRamBytes = $OperatingSystem.FreePhysicalMemory * 1KB
-$TotalRamGB = [math]:: Round($TotalRamBytes / 1GB, 2)
-$FreeRamGB = [math]:: Round($FreeRamBytes / 1GB, 2)
-$UsedRamGB = [math]:: Round($TotalRamGB - $FreeRamGB, 2)
+$TotalRamGB = [math]::Round($TotalRamBytes / 1GB, 2)
+$FreeRamGB = [math]::Round($FreeRamBytes / 1GB, 2)
+$UsedRamGB = [math]::Round($TotalRamGB - $FreeRamGB, 2)
 
 $Disk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'"
 $DiskSizeGB = [math]::Round($Disk.Size / 1GB, 2)
@@ -52,7 +52,6 @@ $NetworkAdapters = Get-NetAdapter
 
 $ImportantServices = Get-Service -Name wuauserv, Spooler, WinDefend
 
-$RecentSystemErrors = Get-EventLog -LogName System -EntryType Error -Newest 5
 $Warnings = @()
 if ($DiskFreePercent -lt 15) {
     $Warnings += "Low disk space warning: C: drive free space is below 15%."
@@ -64,7 +63,7 @@ if ($UptimeDays -gt 7) {
 $StoppedServices = $ImportantServices | Where-Object Status -ne "Running"
 
 if ($StoppedServices) {
-    $Warnings += "Service warning: One or more important services are not running."
+    $Warnings += "Service warning: Not running - $($StoppedServices.DisplayName)"
 }
 
 $DisabledAdapters = $NetworkAdapters | Where-Object Status -eq "Disabled"
@@ -95,6 +94,7 @@ $SystemReport = [PSCustomObject]@{
     DiskFreeGB           = $DiskFreeGB
     DiskFreePercent      = $DiskFreePercent
     IpAddress            = $IpAddress
+    Warnings             = $Warnings -join "; "
 }
 
 $TxtContent = @"
@@ -129,7 +129,76 @@ $($Warnings -join "`n")
 "@
 $TxtContent | Out-File -FilePath $TxtReport
 $SystemReport | Export-Csv -Path $CsvReport -NoTypeInformation
-$HtmlContent = $SystemReport | ConvertTo-Html -Title "IT System Health Check Report" -PreContent "<h1>IT System Health Check Report</h1>"
+$HtmlContent = @"
+<html>
+<head>
+<title>IT System Health Check Report</title>
+<style>
+body {
+    font-family: Arial;
+    margin: 30px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.label {
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+<h1>IT System Health Check Report</h1>
+
+<div class="section">
+<p><span class="label">Computer Name:</span> $ComputerName</p>
+<p><span class="label">Logged-in User:</span> $LoggedInUser</p>
+<p><span class="label">Report Date:</span> $CurrentDate</p>
+</div>
+
+<div class="section">
+<p><span class="label">Windows Version:</span> $WindowsVersion</p>
+<p><span class="label">Windows Build:</span> $WindowsBuild</p>
+<p><span class="label">Last Boot Time:</span> $LastBootTime</p>
+<p><span class="label">Uptime Days:</span> $UptimeDays</p>
+</div>
+
+<div class="section">
+<p><span class="label">CPU Name:</span> $CpuName</p>
+<p><span class="label">CPU Cores:</span> $CpuCores</p>
+<p><span class="label">CPU Logical Processors:</span> $CpuLogicalProcessors</p>
+</div>
+
+<div class="section">
+<p><span class="label">Total RAM:</span> $TotalRamGB GB</p>
+<p><span class="label">Used RAM:</span> $UsedRamGB GB</p>
+<p><span class="label">Free RAM:</span> $FreeRamGB GB</p>
+</div>
+
+<div class="section">
+<p><span class="label">Disk Size:</span> $DiskSizeGB GB</p>
+<p><span class="label">Disk Used:</span> $DiskUsedGB GB</p>
+<p><span class="label">Disk Free:</span> $DiskFreeGB GB</p>
+<p><span class="label">Disk Free Percent:</span> $DiskFreePercent%</p>
+</div>
+
+<div class="section">
+<p><span class="label">IP Address:</span> $IpAddress</p>
+</div>
+
+<div class="section">
+<h2>Warnings</h2>
+<p>$($Warnings -join "<br>")</p>
+</div>
+
+</body>
+</html>
+"@
 $HtmlContent | Out-File -FilePath $HtmlReport
 
 Write-Host "System health check completed."
