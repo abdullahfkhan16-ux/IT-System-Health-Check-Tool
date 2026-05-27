@@ -2,52 +2,68 @@
 
 ## Script Purpose
 
-The PowerShell script will collect useful system health information from a Windows computer.
+The PowerShell script collects useful system health information from a Windows computer.
 
 The goal is to make a simple tool that could help an IT support technician gather information before troubleshooting or escalating a ticket.
 
-## Information the Script Will Collect
+## Information the Script Collects
 
-The script should collect:
+The script collects:
 
 - Computer name
 - Logged-in user
-- Windows version
+- Report date
+- Windows version and build
 - Last boot time
 - System uptime
 - CPU information
-- RAM information
+- RAM usage
 - Disk space
 - IP address
 - Network adapter status
-- Important service status
-- Windows Update service status
-- Print Spooler service status
-- Recent system errors, if reasonable
+- Important Windows services
+- Basic warning messages
 
 ## Warning Checks
 
-The script should show warnings for common support issues, such as:
+The script shows warnings for common support issues, such as:
 
 - Low disk space
 - High system uptime
 - Stopped services
 - Disabled network adapters
 
-## Planned Output Files
+## Output Files
 
-The script should create reports in these formats:
+The script creates reports in these formats:
 
 - TXT
 - CSV
 - HTML
 
-## Notes While Building
-
-This section will be updated while the script is being built and tested.
-
 ## Build Notes
 
-This file will be updated while the script is being built.
+The script was built in small sections so each part could be tested and understood.
 
-The notes will explain the main PowerShell commands used in the script and why they were added.
+The main PowerShell commands used in the script include:
+
+- `Get-CimInstance` to collect Windows, CPU, RAM, and disk information
+- `Get-NetIPConfiguration` to collect IP address information
+- `Get-NetAdapter` to check network adapter status
+- `Get-Service` to check important Windows services
+- `Out-File` to create TXT and HTML reports
+- `Export-Csv` to create the CSV report
+
+## First Working Version
+
+The first working version of the script collects basic Windows system health information and creates TXT, CSV, and HTML reports.
+
+The warning section checks for low disk space, high uptime, stopped services, and disabled network adapters.
+
+The script was tested locally on my own Windows laptop. The raw reports included real device information, so they were kept private and ignored with `.gitignore`.
+
+The reports included in the repository are sanitized sample reports. They use test values instead of my real computer name, username, and IP address.
+
+## Future Improvement Notes
+
+A future version could include a cleaner event log section that shows recent system errors in a readable format.
