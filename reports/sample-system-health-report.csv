@@ -1,0 +1,2 @@
+"ComputerName","LoggedInUser","ReportDate","WindowsVersion","WindowsBuild","LastBootTime","UptimeDays","CpuName","CpuCores","CpuLogicalProcessors","TotalRamGB","UsedRamGB","FreeRamGB","DiskSizeGB","DiskUsedGB","DiskFreeGB","DiskFreePercent","IpAddress","Warnings"
+"DESKTOP-SAMPLE01","TestUser","2026-05-25 9:20:36 PM","Microsoft Windows 11 Pro","26200","2026-05-24 2:46:12 PM","1.3","Intel(R) Core(TM) i5 Sample CPU","4","8","8","6.7","1.3","476","377","99","20.8","192.168.1.25","Service warning: Not running - Windows Update"

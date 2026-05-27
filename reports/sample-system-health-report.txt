@@ -1,0 +1,28 @@
+IT System Health Check Report
+
+Computer Name: DESKTOP-SAMPLE01
+Logged-in User: TestUser
+Report Date: 05/25/2026 21:20:36
+
+Windows Version: Microsoft Windows 11 Pro
+Windows Build: 26200
+Last Boot Time: 05/24/2026 14:46:12
+Uptime Days: 1.3
+
+CPU Name: Intel(R) Core(TM) i5 Sample CPU
+CPU Cores: 4
+CPU Logical Processors: 8
+
+Total RAM: 8 GB
+Used RAM: 6.7 GB
+Free RAM: 1.3 GB
+
+Disk Size: 476 GB
+Disk Used: 377 GB
+Disk Free: 99 GB
+Disk Free Percent: 20.8%
+
+IP Address: 192.168.1.25
+
+Warnings:
+Service warning: Not running - Windows Update
